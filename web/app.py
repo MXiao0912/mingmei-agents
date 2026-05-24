@@ -32,6 +32,104 @@ DATE_RANGE_OPTIONS = {
     "Last 180 days": 180,
     "All": None,
 }
+NEWS_SOURCES = {"Financial Times Markets"}
+POLICY_SOURCES = {
+    "BIS Working Papers",
+    "CEPR Feed",
+    "VoxEU Recent Content",
+    "IMF Working Papers",
+    "NBER Working Papers",
+}
+JOURNAL_EXCLUDED_SOURCES = NEWS_SOURCES | POLICY_SOURCES
+MUST_READ_LIMIT = 35
+SIDE_PANEL_LIMIT = 7
+
+
+def inject_dashboard_css() -> None:
+    st.markdown(
+        """
+        <style>
+        :root {
+            --panel: #121922;
+            --panel-raised: #17212c;
+            --border: #263442;
+            --text: #ecf1f5;
+            --muted: #8ea1b4;
+            --accent: #39c0c3;
+            --high: #39c0c3;
+            --medium: #e5b85c;
+            --low: #708395;
+            --saved: #d7ae55;
+        }
+        .stApp { background: #0a1118; color: var(--text); }
+        [data-testid="stSidebar"] { background: #0d151e; border-right: 1px solid var(--border); }
+        [data-testid="stMainBlockContainer"] { padding-top: 1.25rem; padding-bottom: 1rem; max-width: 1500px; }
+        h1 { font-size: 1.7rem !important; font-weight: 650 !important; letter-spacing: 0 !important; margin-bottom: .3rem !important; }
+        h2, h3 { letter-spacing: 0 !important; }
+        [data-testid="stVerticalBlockBorderWrapper"] {
+            border-color: var(--border) !important;
+            border-radius: 6px !important;
+            background: var(--panel);
+        }
+        [data-testid="stMetric"] {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--panel);
+            padding: .45rem .7rem;
+        }
+        [data-testid="stMetricLabel"] { color: var(--muted); font-size: .72rem; }
+        [data-testid="stMetricValue"] { color: var(--text); font-size: 1.18rem; }
+        [data-testid="stButton"] button[kind="tertiary"] {
+            color: var(--text);
+            padding: 0 !important;
+            min-height: 0 !important;
+            line-height: 1.25 !important;
+            text-align: left !important;
+            justify-content: flex-start !important;
+            font-weight: 600;
+        }
+        [data-testid="stButton"] button[kind="tertiary"]:hover { color: var(--accent); }
+        .rr-head {
+            color: var(--text);
+            font-size: .98rem;
+            font-weight: 650;
+            margin: .1rem 0 .45rem;
+        }
+        .rr-count { color: var(--muted); font-size: .73rem; font-weight: 400; float: right; margin-top: .15rem; }
+        .rr-score {
+            display: inline-flex;
+            min-width: 2.65rem;
+            justify-content: center;
+            padding: .2rem .35rem;
+            border-radius: 4px;
+            font-size: .75rem;
+            font-weight: 700;
+            color: #081117;
+            background: var(--accent);
+        }
+        .rr-label { display: inline-block; padding: .1rem .35rem; border-radius: 4px; font-size: .66rem; font-weight: 700; text-transform: uppercase; }
+        .rr-label-high { color: var(--high); background: rgba(57,192,195,.14); }
+        .rr-label-medium { color: var(--medium); background: rgba(229,184,92,.14); }
+        .rr-label-low { color: var(--low); background: rgba(112,131,149,.15); }
+        .rr-status { display: inline-block; padding: .1rem .35rem; border-radius: 4px; font-size: .66rem; text-transform: uppercase; }
+        .rr-status-saved { color: var(--saved); background: rgba(215,174,85,.14); }
+        .rr-status-irrelevant { color: var(--low); background: rgba(112,131,149,.15); }
+        .rr-meta { color: var(--muted); font-size: .7rem; line-height: 1.25; margin: .1rem 0; }
+        .rr-snippet { color: #b9c7d3; font-size: .75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: .12rem; }
+        .rr-tag { color: var(--accent); }
+        .rr-empty { color: var(--muted); font-size: .8rem; padding: .5rem 0; }
+        .rr-reading { max-width: 900px; padding-top: .45rem; }
+        .rr-reading-title { color: var(--text); font-size: 2rem; line-height: 1.2; font-weight: 650; margin: .65rem 0 .65rem; }
+        .rr-reading-meta { color: var(--muted); font-size: .82rem; line-height: 1.45; margin-bottom: 1.25rem; }
+        .rr-section-title { color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .08em; margin: 1.2rem 0 .45rem; }
+        .rr-summary { color: #d7e0e8; font-size: .98rem; line-height: 1.62; max-width: 780px; }
+        .rr-scoreline { color: var(--muted); font-size: .8rem; margin: .65rem 0 1rem; }
+        hr { border-color: var(--border) !important; }
+        [data-testid="stExpander"] { border-color: var(--border); background: var(--panel); }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def save_preferences(preferences: dict) -> None:
@@ -212,6 +310,12 @@ def load_items(db_path: str) -> pd.DataFrame:
         status_expr = "read_status" if "read_status" in columns else "'unread' AS read_status"
         score_expr = "relevance_score" if "relevance_score" in columns else "0 AS relevance_score"
         tags_expr = "topic_tags" if "topic_tags" in columns else "'' AS topic_tags"
+        if "authors" in columns:
+            authors_expr = "authors AS authors"
+        elif "author" in columns:
+            authors_expr = "author AS authors"
+        else:
+            authors_expr = "NULL AS authors"
         user_rating_expr = "user_rating" if "user_rating" in columns else "NULL AS user_rating"
         learned_expr = (
             "learned_preference_score"
@@ -234,6 +338,7 @@ def load_items(db_path: str) -> pd.DataFrame:
             SELECT
                 id,
                 title,
+                {authors_expr},
                 source_name,
                 {date_expr},
                 summary,
@@ -270,7 +375,8 @@ def load_items(db_path: str) -> pd.DataFrame:
     items["topic_tags"] = items["topic_tags"].fillna("")
     items["read_status"] = items["read_status"].fillna("unread")
     items["latest_notes"] = items["latest_notes"].fillna("")
-    for column in ["title", "source_name", "read_status", "topic_tags", "latest_notes"]:
+    items["authors"] = items["authors"].fillna("")
+    for column in ["title", "authors", "source_name", "read_status", "topic_tags", "latest_notes"]:
         items[column] = items[column].apply(clean_text)
     items["summary"] = items["summary"].apply(clean_summary)
 
@@ -287,33 +393,63 @@ def format_date(value: pd.Timestamp) -> str:
     return value.strftime("%Y-%m-%d")
 
 
-def render_item(row: pd.Series) -> None:
+def short_summary(value: object, limit: int = 150) -> str:
+    text = str(value or "").strip()
+    if len(text) <= limit:
+        return text
+    return f"{text[:limit].rsplit(' ', 1)[0]}..."
+
+
+def label_html(label: str) -> str:
+    return f'<span class="rr-label rr-label-{html.escape(label)}">{html.escape(label)}</span>'
+
+
+def status_html(status: str) -> str:
+    safe_status = html.escape(str(status))
+    if status in {"saved", "irrelevant"}:
+        return f'<span class="rr-status rr-status-{safe_status}">{safe_status}</span>'
+    return safe_status
+
+
+def render_detail_view(row: pd.Series) -> None:
     preferences = load_preferences()
     label = score_label(float(row["personalized_score"]), preferences)
 
-    st.subheader(row["title"])
-    st.caption(
-        f"{row['source_name']} | {format_date(row['published_date'])} | "
-        f"{row['read_status']} | {label} | personalized {row['personalized_score']:.1f}"
-    )
+    if st.button("Back to dashboard", icon=":material/arrow_back:", type="tertiary"):
+        st.session_state.pop("selected_item_id", None)
+        st.rerun()
 
-    st.write(
-        "Scores: "
-        f"topical {row['relevance_score']:.1f} | "
-        f"learned {row['learned_preference_score']:.1f} | "
-        f"personalized {row['personalized_score']:.1f}"
-    )
+    with st.container():
+        st.markdown('<div class="rr-reading">', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="rr-reading-title">{html.escape(str(row["title"]))}</div>',
+            unsafe_allow_html=True,
+        )
+        author_line = f"{row['authors']} | " if row.get("authors") else ""
+        st.markdown(
+            f'<div class="rr-reading-meta">{html.escape(author_line)}'
+            f'{html.escape(str(row["source_name"]))} | {html.escape(format_date(row["published_date"]))} | '
+            f'{status_html(str(row["read_status"]))} &nbsp; {label_html(label)}</div>',
+            unsafe_allow_html=True,
+        )
+        tags = html.escape(str(row["topic_tags"] or "No topic tags"))
+        st.markdown(
+            f'<div class="rr-scoreline">Topics: {tags}<br>'
+            f'Topical {row["relevance_score"]:.1f} &nbsp;|&nbsp; '
+            f'Learned {row["learned_preference_score"]:.1f} &nbsp;|&nbsp; '
+            f'Personalized {row["personalized_score"]:.1f}</div>',
+            unsafe_allow_html=True,
+        )
+        if row.get("link"):
+            st.link_button("Open article", str(row["link"]), type="primary", icon=":material/open_in_new:")
+        st.markdown('<div class="rr-section-title">SUMMARY</div>', unsafe_allow_html=True)
+        summary = str(row.get("summary") or "No summary available.")
+        st.markdown(f'<div class="rr-summary">{html.escape(summary)}</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    if row.get("topic_tags"):
-        st.write(f"Topics: {row['topic_tags']}")
-
-    if row.get("summary"):
-        st.write(row["summary"])
-
-    if row.get("link"):
-        st.link_button("Open paper", row["link"])
-
-    with st.expander("Feedback"):
+    st.divider()
+    with st.container(border=True):
+        st.subheader("Feedback")
         rating_value = row["user_rating"]
         default_rating = 3 if pd.isna(rating_value) else int(rating_value)
         rating = st.slider(
@@ -321,7 +457,7 @@ def render_item(row: pd.Series) -> None:
             min_value=1,
             max_value=5,
             value=default_rating,
-            key=f"rating_{row['id']}",
+            key=f"rating_details_{row['id']}",
         )
         status_index = (
             READ_STATUS_OPTIONS.index(row["read_status"])
@@ -332,14 +468,14 @@ def render_item(row: pd.Series) -> None:
             "Read status",
             READ_STATUS_OPTIONS,
             index=status_index,
-            key=f"status_{row['id']}",
+            key=f"status_details_{row['id']}",
         )
         notes = st.text_area(
             "Notes",
             value=row["latest_notes"],
-            key=f"notes_{row['id']}",
+            key=f"notes_details_{row['id']}",
         )
-        if st.button("Save feedback", key=f"save_{row['id']}"):
+        if st.button("Save feedback", key=f"save_details_{row['id']}"):
             save_feedback(int(row["id"]), rating, read_status, notes)
             learn_preferences(DB_PATH)
             load_items.clear()
@@ -347,7 +483,91 @@ def render_item(row: pd.Series) -> None:
             st.success("Feedback saved and scores updated.")
             st.rerun()
 
-    st.divider()
+def select_item(item_id: int) -> None:
+    st.session_state.selected_item_id = item_id
+
+
+def render_must_read_row(row: pd.Series, section_key: str, preferences: dict) -> None:
+    label = score_label(float(row["personalized_score"]), preferences)
+    title = str(row["title"])
+    meta = (
+        f"{html.escape(str(row['source_name']))} | {html.escape(format_date(row['published_date']))} | "
+        f"{html.escape(str(row['topic_tags'] or 'untagged'))} | {status_html(str(row['read_status']))}"
+    )
+
+    with st.container(border=True):
+        score_column, body_column = st.columns([0.72, 6], vertical_alignment="top")
+        with score_column:
+            st.markdown(
+                f'<span class="rr-score">{row["personalized_score"]:.1f}</span>',
+                unsafe_allow_html=True,
+            )
+            st.markdown(label_html(label), unsafe_allow_html=True)
+        with body_column:
+            if st.button(
+                title,
+                key=f"select_{section_key}_{row['id']}",
+                type="tertiary",
+                width="stretch",
+            ):
+                select_item(int(row["id"]))
+                st.rerun()
+            st.markdown(f'<div class="rr-meta">{meta}</div>', unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="rr-snippet">{html.escape(short_summary(row["summary"]))}</div>',
+                unsafe_allow_html=True,
+            )
+
+
+def render_stream_row(row: pd.Series, section_key: str, preferences: dict) -> None:
+    label = score_label(float(row["personalized_score"]), preferences)
+    title = str(row["title"])
+    meta = (
+        f"{html.escape(str(row['source_name']))} | {html.escape(format_date(row['published_date']))} | "
+        f"score {row['personalized_score']:.1f} | {status_html(str(row['read_status']))}"
+    )
+
+    with st.container(border=True):
+        if st.button(
+            title,
+            key=f"select_{section_key}_{row['id']}",
+            type="tertiary",
+            width="stretch",
+        ):
+            select_item(int(row["id"]))
+            st.rerun()
+        st.markdown(
+            f'<div class="rr-meta">{label_html(label)} &nbsp; {meta}</div>',
+            unsafe_allow_html=True,
+        )
+
+
+def render_list_panel(
+    title: str,
+    items: pd.DataFrame,
+    empty_message: str,
+    section_key: str,
+    preferences: dict,
+    main: bool = False,
+) -> None:
+    limit = MUST_READ_LIMIT if main else SIDE_PANEL_LIMIT
+    height = 870 if main else 228
+
+    with st.container(border=True, height=height):
+        st.markdown(
+            f'<div class="rr-head">{html.escape(title)}'
+            f'<span class="rr-count">{len(items)} items</span></div>',
+            unsafe_allow_html=True,
+        )
+        if items.empty:
+            st.markdown(f'<div class="rr-empty">{html.escape(empty_message)}</div>', unsafe_allow_html=True)
+            return
+
+        for _, row in items.head(limit).iterrows():
+            if main:
+                render_must_read_row(row, section_key, preferences)
+            else:
+                render_stream_row(row, section_key, preferences)
 
 
 def grouped_keywords(preferences: dict) -> dict[str, list[dict[str, object]]]:
@@ -479,14 +699,16 @@ def render_preferences_editor(preferences: dict) -> None:
 def main() -> None:
     st.set_page_config(page_title="Research Reader", layout="wide")
     ensure_project_dirs()
-    st.title("Research Reader")
+    inject_dashboard_css()
+    st.title("Research Intelligence")
+    st.caption("PERSONAL RESEARCH COMMAND CENTER  |  RANKED MONITOR")
 
     health = database_health(str(DB_PATH))
     with st.sidebar:
-        st.header("Deployment Health")
-        st.write(f"Database: {'found' if health['exists'] else 'missing'}")
-        st.write(f"Collected items: {health['item_count']}")
-        st.write(f"Last collection: {health['last_collection_date'] or 'unknown'}")
+        with st.expander("App Status"):
+            st.write(f"Database: {'found' if health['exists'] else 'missing'}")
+            st.write(f"Collected items: {health['item_count']}")
+            st.write(f"Last collection: {health['last_collection_date'] or 'unknown'}")
 
     if not health["exists"]:
         st.warning(
@@ -511,13 +733,17 @@ def main() -> None:
 
     preferences = load_preferences()
     relevance_min, relevance_max = score_bounds(preferences)
-    render_preferences_editor(preferences)
+    selected_item_id = st.session_state.get("selected_item_id")
+    if selected_item_id is not None:
+        selected_rows = items[items["id"] == selected_item_id]
+        if not selected_rows.empty:
+            render_detail_view(selected_rows.iloc[0])
+            return
+        st.session_state.pop("selected_item_id", None)
 
-    with st.sidebar:
-        st.header("Filters")
-
+    with st.sidebar.expander("Filters", expanded=True):
         sources = sorted(items["source_name"].dropna().unique())
-        selected_sources = st.multiselect("Source", sources, default=sources)
+        selected_sources = st.multiselect("Source", sources, placeholder="All sources")
 
         statuses = sorted(items["read_status"].dropna().unique())
         selected_statuses = st.multiselect("Status", statuses, default=statuses)
@@ -546,8 +772,16 @@ def main() -> None:
             step=0.5,
         )
 
-    filtered = items[
+    with st.sidebar:
+        render_preferences_editor(preferences)
+
+    source_matches = (
         items["source_name"].isin(selected_sources)
+        if selected_sources
+        else pd.Series(True, index=items.index)
+    )
+    filtered = items[
+        source_matches
         & items["read_status"].isin(selected_statuses)
         & (items["personalized_score"] >= min_score)
     ]
@@ -566,10 +800,48 @@ def main() -> None:
         na_position="last",
     )
 
-    st.caption(f"Showing {len(filtered)} of {len(items)} papers")
+    high_threshold = float(preferences["relevance_labels"]["high"])
+    # Must Read is an actionable queue: recent filtered items, not finished,
+    # whose personalized ranking reaches the configured high threshold.
+    must_read = filtered[
+        filtered["read_status"].isin(["unread", "skimmed"])
+        & (filtered["personalized_score"] >= high_threshold)
+    ]
+    news = filtered[filtered["source_name"].isin(NEWS_SOURCES)]
+    policy = filtered[filtered["source_name"].isin(POLICY_SOURCES)]
+    research = filtered[~filtered["source_name"].isin(JOURNAL_EXCLUDED_SOURCES)]
+    saved = filtered[filtered["read_status"] == "saved"]
 
-    for _, row in filtered.iterrows():
-        render_item(row)
+    tag_values = [
+        tag.strip()
+        for tag_text in filtered["topic_tags"]
+        for tag in str(tag_text).split(",")
+        if tag.strip()
+    ]
+    top_topic = pd.Series(tag_values).value_counts().index[0] if tag_values else "-"
+    summary_columns = st.columns(5)
+    summary_columns[0].metric("Shown", len(filtered))
+    summary_columns[1].metric("Must Read", len(must_read))
+    summary_columns[2].metric("Saved", len(saved))
+    summary_columns[3].metric("High Relevance", int((filtered["personalized_score"] >= high_threshold).sum()))
+    summary_columns[4].metric("Top Topic", top_topic)
+
+    st.write("")
+    main_column, side_column = st.columns([2.1, 1], gap="medium")
+    with main_column:
+        render_list_panel(
+            "Must Read / Ranked Queue",
+            must_read,
+            "No high-relevance unread or skimmed papers match the current filters.",
+            "must_read",
+            preferences,
+            main=True,
+        )
+    with side_column:
+        render_list_panel("News - Markets", news, "No market news.", "news", preferences)
+        render_list_panel("Policy - Institutions", policy, "No policy papers.", "policy", preferences)
+        render_list_panel("Research - Journals", research, "No journal papers.", "research", preferences)
+        render_list_panel("Saved for Later", saved, "No saved papers yet.", "saved", preferences)
 
 
 if __name__ == "__main__":

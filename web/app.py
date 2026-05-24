@@ -41,6 +41,10 @@ POLICY_SOURCES = {
     "NBER Working Papers",
 }
 JOURNAL_EXCLUDED_SOURCES = NEWS_SOURCES | POLICY_SOURCES
+MUST_READ_VISIBLE_ROWS = 20
+SIDE_VISIBLE_ROWS = 5
+MUST_READ_ROW_HEIGHT = 112
+SIDE_ROW_HEIGHT = 92
 
 
 def inject_dashboard_css() -> None:
@@ -566,7 +570,11 @@ def render_list_panel(
     preferences: dict,
     main: bool = False,
 ) -> None:
-    with st.container(border=True):
+    visible_rows = MUST_READ_VISIBLE_ROWS if main else SIDE_VISIBLE_ROWS
+    row_height = MUST_READ_ROW_HEIGHT if main else SIDE_ROW_HEIGHT
+    panel_height = 58 + visible_rows * row_height
+
+    with st.container(border=True, height=panel_height):
         st.markdown(
             f'<div class="rr-head">{html.escape(title)}'
             f'<span class="rr-count">{len(items)} items</span></div>',
@@ -758,8 +766,11 @@ def main() -> None:
         sources = sorted(items["source_name"].dropna().unique())
         selected_sources = st.multiselect("Source", sources, placeholder="All sources")
 
-        statuses = sorted(items["read_status"].dropna().unique())
-        selected_statuses = st.multiselect("Status", statuses, default=statuses)
+        selected_statuses = st.multiselect(
+            "Status",
+            READ_STATUS_OPTIONS,
+            default=READ_STATUS_OPTIONS,
+        )
 
         date_range = st.selectbox(
             "Date range",

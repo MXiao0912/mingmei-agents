@@ -1,0 +1,99 @@
+sources:
+  # News / Markets
+  - name: Financial Times Markets
+    type: rss
+    url: "https://www.ft.com/markets?format=rss"
+    category: news_markets
+
+  # Policy / Institutions
+  - name: BIS Working Papers
+    type: rss
+    url: "https://www.bis.org/doclist/wppubls.rss?from=&till=&page=&paging_length=10&sort_list=date_desc&theme=wppubls&ml=false&mlurl=&emptylisttext="
+    category: policy_institutions
+    category: policy_institutions
+
+  - name: CEPR Feed
+    type: rss
+    url: "https://feeds.feedburner.com/cepr"
+    category: policy_institutions
+
+  - name: VoxEU Recent Content
+    type: rss
+    url: "https://cepr.org/rss/vox-content"
+    category: policy_institutions
+
+  - name: ECB Working Papers
+    type: rss
+    url: "https://www.ecb.europa.eu/rss/wppub.html"
+    category: policy_institutions
+
+  - name: NBER Working Papers
+    type: rss
+    url: "https://www.nber.org/rss/new.xml"
+    category: policy_institutions
+
+  # Research / Journals
+  - name: Journal of Finance
+    type: rss
+    url: "https://onlinelibrary.wiley.com/feed/15406261/most-recent"
+    category: research_journals
+
+  - name: Journal of Applied Econometrics
+    type: rss
+    url: "http://onlinelibrary.wiley.com/rss/journal/10.1002/(ISSN)1099-1255"
+    category: research_journals
+
+  - name: Econometrica
+    type: rss
+    url: "http://onlinelibrary.wiley.com/rss/journal/10.1111/(ISSN)1468-0262"
+    category: research_journals
+
+  - name: Journal of Economic Perspectives
+    type: rss
+    url: "https://pubs.aeaweb.org/rss/etoc/jep"
+    category: research_journals
+
+  - name: American Economic Review
+    type: rss
+    url: "https://pubs.aeaweb.org/rss/etoc/aer"
+    category: research_journals
+
+  - name: Review of Financial Studies
+    type: rss
+    url: "https://academic.oup.com/rss/site_5511/advanceAccess_3372.xml"
+    category: research_journals
+
+  - name: Quarterly Journal of Economics
+    type: rss
+    url: "https://academic.oup.com/rss/site_5504/advanceAccess_3365.xml"
+    category: research_journals
+
+  - name: Review of Economics and Statistics
+    type: rss
+    url: "https://direct.mit.edu/rss/site_1000065/advanceAccess_1000035.xml"
+    category: research_journals
+
+  - name: Journal of Financial Economics
+    type: rss
+    url: "https://rss.sciencedirect.com/publication/science/0304405X"
+    category: research_journals
+
+  - name: Journal of Econometrics
+    type: rss
+    url: "https://rss.sciencedirect.com/publication/science/03044076"
+    category: research_journals
+
+  - name: International Journal of Forecasting
+    type: rss
+    url: "https://rss.sciencedirect.com/publication/science/01692070"
+    category: research_journals
+
+  - name: Journal of Banking and Finance
+    type: rss
+    url: "https://rss.sciencedirect.com/publication/science/03784266"
+    category: research_journals
+
+  - name: Journal of Political Economy
+    type: rss
+    url: "https://www.journals.uchicago.edu/action/showFeed?ui=0&mi=0&ai=t6&jc=jpe&type=etoc&feed=rss"
+    category: research_journals

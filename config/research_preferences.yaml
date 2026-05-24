@@ -1,0 +1,87 @@
+keyword_weights:
+  ETF: 4
+  exchange traded fund: 4
+  authorized participant: 5
+  market microstructure: 5
+  liquidity: 2
+  inventory: 3
+  repo: 4
+  sovereign bond: 3
+  fixed income: 2
+  capital flows: 4
+  fund flows: 5
+  emerging markets: 3
+  systemic risk: 4
+  financial stability: 3
+  covariance: 3
+  shrinkage: 3
+  high-dimensional: 3
+  score-driven: 4
+  nowcasting: 2
+  volatility: 2
+
+topic_mappings:
+  ETF:
+    - ETF
+    - exchange traded fund
+    - authorized participant
+  Market Microstructure:
+    - market microstructure
+    - liquidity
+    - inventory
+  Repo:
+    - repo
+    - sovereign bond
+    - fixed income
+  EM Fund Flows:
+    - capital flows
+    - fund flows
+    - emerging markets
+  Econometrics:
+    - covariance
+    - shrinkage
+    - high-dimensional
+    - score-driven
+    - nowcasting
+
+source_boosts:
+source_boosts:
+  Financial Times Markets: 1
+
+  BIS Working Papers: 3
+  CEPR Feed: 2
+  VoxEU Recent Content: 1
+  ECB Working Papers: 2
+  NBER Working Papers: 3 #
+
+  Journal of Finance: 3
+  Journal of Financial Economics: 3
+  Review of Financial Studies: 3 #
+  Journal of Political Economy: 3
+  Econometrica: 3
+  American Economic Review: 3
+  Quarterly Journal of Economics: 3
+
+  Journal of Econometrics: 3
+  Journal of Applied Econometrics: 2
+  International Journal of Forecasting: 2
+
+  Journal of Banking and Finance: 2
+  Journal of Economic Perspectives: 2
+  Review of Economics and Statistics: 2
+
+scoring:
+  title_multiplier: 2
+  summary_multiplier: 1
+  relevance_min: 0
+  relevance_max: 10
+  personalized_weight_topical: 0.7
+  personalized_weight_learned: 0.3
+
+relevance_labels:
+  high: 7
+  medium: 4
+
+learning:
+  prior_rating: 3
+  shrinkage_n: 3

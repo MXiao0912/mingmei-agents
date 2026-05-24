@@ -41,8 +41,6 @@ POLICY_SOURCES = {
     "NBER Working Papers",
 }
 JOURNAL_EXCLUDED_SOURCES = NEWS_SOURCES | POLICY_SOURCES
-MUST_READ_LIMIT = 35
-SIDE_PANEL_LIMIT = 7
 
 
 def inject_dashboard_css() -> None:
@@ -568,10 +566,7 @@ def render_list_panel(
     preferences: dict,
     main: bool = False,
 ) -> None:
-    limit = MUST_READ_LIMIT if main else SIDE_PANEL_LIMIT
-    height = 870 if main else 228
-
-    with st.container(border=True, height=height):
+    with st.container(border=True):
         st.markdown(
             f'<div class="rr-head">{html.escape(title)}'
             f'<span class="rr-count">{len(items)} items</span></div>',
@@ -581,7 +576,7 @@ def render_list_panel(
             st.markdown(f'<div class="rr-empty">{html.escape(empty_message)}</div>', unsafe_allow_html=True)
             return
 
-        for _, row in items.head(limit).iterrows():
+        for _, row in items.iterrows():
             if main:
                 render_must_read_row(row, section_key, preferences)
             else:

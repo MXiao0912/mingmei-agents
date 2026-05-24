@@ -61,8 +61,8 @@ def inject_dashboard_css() -> None:
             --low: #708395;
             --saved: #d7ae55;
         }
-        .stApp { background: #0a1118; color: var(--text); }
-        [data-testid="stSidebar"] { background: #0d151e; border-right: 1px solid var(--border); }
+        .stApp { background: #0a1118; color: var(--text); text-align: left; }
+        [data-testid="stSidebar"] { background: #0d151e; border-right: 1px solid var(--border); text-align: left; }
         [data-testid="stMainBlockContainer"] { padding-top: 1.25rem; padding-bottom: 1rem; max-width: 1500px; }
         h1 { font-size: 1.7rem !important; font-weight: 650 !important; letter-spacing: 0 !important; margin-bottom: .3rem !important; }
         h2, h3 { letter-spacing: 0 !important; }
@@ -79,43 +79,61 @@ def inject_dashboard_css() -> None:
         }
         [data-testid="stMetricLabel"] { color: var(--muted); font-size: .72rem; }
         [data-testid="stMetricValue"] { color: var(--text); font-size: 1.18rem; }
-        [data-testid="stButton"] button[kind="tertiary"] {
+        [data-testid="stButton"] button {
+            text-align: left !important;
+            justify-content: flex-start !important;
+        }
+        [data-testid="stButton"] button[kind="tertiary"],
+        button[data-testid="stBaseButton-tertiary"] {
             color: var(--text);
             padding: 0 !important;
             min-height: 0 !important;
             line-height: 1.25 !important;
-            text-align: left !important;
-            justify-content: flex-start !important;
             font-weight: 600;
         }
-        [data-testid="stButton"] button[kind="tertiary"]:hover { color: var(--accent); }
+        /* Streamlit renders paper titles inside a tertiary button label. */
+        .paper-title,
+        [data-testid="stButton"] button p,
+        [data-testid="stButton"] button div,
+        button[data-testid="stBaseButton-tertiary"] p,
+        button[data-testid="stBaseButton-tertiary"] div {
+            width: 100%;
+            text-align: left !important;
+            justify-content: flex-start !important;
+        }
+        .paper-meta { text-align: left !important; }
+        .paper-summary { text-align: left !important; }
+        [data-testid="stButton"] button[kind="tertiary"]:hover,
+        button[data-testid="stBaseButton-tertiary"]:hover { color: var(--accent); }
         .rr-head {
             color: var(--text);
             font-size: .98rem;
             font-weight: 650;
             margin: .1rem 0 .45rem;
+            text-align: left;
         }
-        .rr-count { color: var(--muted); font-size: .73rem; font-weight: 400; float: right; margin-top: .15rem; }
+        .rr-count { display: block; color: var(--muted); font-size: .73rem; font-weight: 400; margin-top: .12rem; text-align: left; }
         .rr-score {
             display: inline-flex;
             min-width: 2.65rem;
-            justify-content: center;
+            justify-content: flex-start;
             padding: .2rem .35rem;
             border-radius: 4px;
             font-size: .75rem;
             font-weight: 700;
             color: #081117;
             background: var(--accent);
+            text-align: left;
         }
-        .rr-label { display: inline-block; padding: .1rem .35rem; border-radius: 4px; font-size: .66rem; font-weight: 700; text-transform: uppercase; }
+        .rr-label { display: inline-block; padding: .1rem .35rem; border-radius: 4px; font-size: .66rem; font-weight: 700; text-transform: uppercase; text-align: left; }
         .rr-label-high { color: var(--high); background: rgba(57,192,195,.14); }
         .rr-label-medium { color: var(--medium); background: rgba(229,184,92,.14); }
         .rr-label-low { color: var(--low); background: rgba(112,131,149,.15); }
-        .rr-status { display: inline-block; padding: .1rem .35rem; border-radius: 4px; font-size: .66rem; text-transform: uppercase; }
+        .rr-status { display: inline-block; padding: .1rem .35rem; border-radius: 4px; font-size: .66rem; text-transform: uppercase; text-align: left; }
         .rr-status-saved { color: var(--saved); background: rgba(215,174,85,.14); }
         .rr-status-irrelevant { color: var(--low); background: rgba(112,131,149,.15); }
-        .rr-meta { color: var(--muted); font-size: .7rem; line-height: 1.25; margin: .1rem 0; }
-        .rr-snippet { color: #b9c7d3; font-size: .75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: .12rem; }
+        .rr-meta { color: var(--muted); font-size: .7rem; line-height: 1.25; margin: .1rem 0; text-align: left; }
+        .rr-snippet { color: #b9c7d3; font-size: .75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: .12rem; text-align: left; }
         .rr-tag { color: var(--accent); }
         .rr-empty { color: var(--muted); font-size: .8rem; padding: .5rem 0; }
         .rr-reading { max-width: 900px; padding-top: .45rem; }
@@ -422,12 +440,12 @@ def render_detail_view(row: pd.Series) -> None:
     with st.container():
         st.markdown('<div class="rr-reading">', unsafe_allow_html=True)
         st.markdown(
-            f'<div class="rr-reading-title">{html.escape(str(row["title"]))}</div>',
+            f'<div class="rr-reading-title paper-title">{html.escape(str(row["title"]))}</div>',
             unsafe_allow_html=True,
         )
         author_line = f"{row['authors']} | " if row.get("authors") else ""
         st.markdown(
-            f'<div class="rr-reading-meta">{html.escape(author_line)}'
+            f'<div class="rr-reading-meta paper-meta">{html.escape(author_line)}'
             f'{html.escape(str(row["source_name"]))} | {html.escape(format_date(row["published_date"]))} | '
             f'{status_html(str(row["read_status"]))} &nbsp; {label_html(label)}</div>',
             unsafe_allow_html=True,
@@ -444,7 +462,7 @@ def render_detail_view(row: pd.Series) -> None:
             st.link_button("Open article", str(row["link"]), type="primary", icon=":material/open_in_new:")
         st.markdown('<div class="rr-section-title">SUMMARY</div>', unsafe_allow_html=True)
         summary = str(row.get("summary") or "No summary available.")
-        st.markdown(f'<div class="rr-summary">{html.escape(summary)}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="rr-summary paper-summary">{html.escape(summary)}</div>', unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
     st.divider()
@@ -512,9 +530,9 @@ def render_must_read_row(row: pd.Series, section_key: str, preferences: dict) ->
             ):
                 select_item(int(row["id"]))
                 st.rerun()
-            st.markdown(f'<div class="rr-meta">{meta}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="rr-meta paper-meta">{meta}</div>', unsafe_allow_html=True)
             st.markdown(
-                f'<div class="rr-snippet">{html.escape(short_summary(row["summary"]))}</div>',
+                f'<div class="rr-snippet paper-summary">{html.escape(short_summary(row["summary"]))}</div>',
                 unsafe_allow_html=True,
             )
 
@@ -537,7 +555,7 @@ def render_stream_row(row: pd.Series, section_key: str, preferences: dict) -> No
             select_item(int(row["id"]))
             st.rerun()
         st.markdown(
-            f'<div class="rr-meta">{label_html(label)} &nbsp; {meta}</div>',
+            f'<div class="rr-meta paper-meta">{label_html(label)} &nbsp; {meta}</div>',
             unsafe_allow_html=True,
         )
 

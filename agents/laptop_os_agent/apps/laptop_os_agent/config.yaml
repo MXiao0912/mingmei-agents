@@ -1,0 +1,34 @@
+scan_roots:
+  - /Users/mingmeixiao
+
+ignored_paths:
+  - /System
+  - /Library
+  - /private
+  - /dev
+  - /Applications
+  - .Trash
+  - .git
+  - __pycache__
+  - node_modules
+  - Library/Caches
+  - Library/Developer
+  - Library/Containers
+  - Library/Group Containers
+  - Library/Application Support/Google/Chrome
+  - Library/Application Support/Chromium
+  - Library/Application Support/Firefox
+  - Library/Application Support/Microsoft Edge
+  - Library/Application Support/BraveSoftware
+  - Library/Application Support/Arc
+  - Library/Safari
+  - .venv/lib
+  - .cache
+  - conda/pkgs
+
+max_scan_depth: 8
+max_hash_file_size_mb: 500
+stale_months:
+  - 6
+  - 12
+  - 24

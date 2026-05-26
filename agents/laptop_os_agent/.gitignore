@@ -1,0 +1,5 @@
+apps/laptop_os_agent/data/*.sqlite3
+apps/laptop_os_agent/reports/
+__pycache__/
+*.py[cod]
+.DS_Store
